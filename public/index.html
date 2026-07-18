@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<title>Кабінет</title>
+<link rel="stylesheet" href="style.css" />
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+  <div id="toast" class="toast" hidden></div>
+
+  <!-- loading state -->
+  <div id="view-loading" class="view-loading">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- subscribe gate -->
+  <div id="view-gate" class="view-gate" hidden>
+    <div class="gate-card">
+      <div class="gate-badge">👋</div>
+      <h1>Ласкаво просимо</h1>
+      <p id="gate-text">Щоб користуватись кабінетом, підпишись на наш канал і підтверди підписку.</p>
+      <a id="gate-channel-btn" class="btn btn-gradient" href="#" target="_blank" rel="noopener">📢 Перейти на канал</a>
+      <button id="gate-verify-btn" class="btn btn-outline">✅ Я підписався</button>
+      <p id="gate-error" class="gate-error" hidden></p>
+    </div>
+  </div>
+
+  <!-- main app -->
+  <div id="app-shell" class="app-shell" hidden>
+    <header class="topbar">
+      <div class="topbar-greeting">
+        <span class="hello" id="hello-text">Привіт!</span>
+        <span class="subtitle">Твій особистий кабінет</span>
+      </div>
+      <button id="how-it-works-btn" class="icon-round" aria-label="Як це працює">?</button>
+    </header>
+
+    <main class="tab-content">
+      <section id="tab-home" class="tab-panel">
+        <div class="hero-card">
+          <div class="hero-label">Баланс</div>
+          <div class="hero-amount" id="home-balance">0 грн</div>
+          <div class="hero-progress">
+            <div class="hero-progress-track">
+              <div class="hero-progress-fill" id="home-progress-fill"></div>
+            </div>
+            <div class="hero-progress-label" id="home-progress-label">До виводу: 0 з 70 грн</div>
+          </div>
+          <div class="hero-stats">
+            <div class="hero-stat">
+              <div class="hero-stat-label">Зароблено всього</div>
+              <div class="hero-stat-value" id="home-total-earned">0 грн</div>
+            </div>
+            <div class="hero-stat">
+              <div class="hero-stat-label">Виведено</div>
+              <div class="hero-stat-value" id="home-total-withdrawn">0 грн</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card link-card">
+          <div class="link-card-head">
+            <span class="link-card-title">🔗 Твоє реферальне посилання</span>
+            <span class="bonus-pill" id="home-bonus-pill">+7 грн / друга</span>
+          </div>
+          <div class="link-box" id="home-link-box">https://t.me/...</div>
+          <div class="link-actions">
+            <button class="btn btn-solid" id="copy-link-btn">Копіювати</button>
+            <button class="btn btn-outline" id="share-link-btn">Поділитися</button>
+          </div>
+        </div>
+
+        <div class="card referrals-count-card">
+          <div class="count-circle" id="home-ref-count">0</div>
+          <div class="count-text">
+            <div class="count-title">Запрошено друзів</div>
+            <div class="count-sub">Кожен верифікований друг = +7 грн на баланс</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="tab-referrals" class="tab-panel" hidden>
+        <h2 class="section-title">Твої реферали</h2>
+        <div id="referrals-list" class="list"></div>
+      </section>
+
+      <section id="tab-withdraw" class="tab-panel" hidden>
+        <div id="withdraw-locked" class="card withdraw-locked" hidden>
+          <div class="lock-icon">🔒</div>
+          <div class="lock-title" id="withdraw-locked-title">Потрібно ще 70 грн</div>
+          <div class="hero-progress">
+            <div class="hero-progress-track">
+              <div class="hero-progress-fill" id="withdraw-progress-fill"></div>
+            </div>
+          </div>
+          <p class="lock-hint">Запрошуй друзів за своїм посиланням, щоб накопичити мінімальну суму для виведення.</p>
+        </div>
+
+        <form id="withdraw-form" class="card withdraw-form" hidden>
+          <div class="withdraw-amount-label">Буде виведено весь баланс</div>
+          <div class="withdraw-amount" id="withdraw-amount">0 грн</div>
+          <label class="field-label" for="withdraw-requisites">Реквізити для отримання коштів</label>
+          <input id="withdraw-requisites" type="text" placeholder="Номер картки або гаманець" autocomplete="off" required />
+          <button type="submit" class="btn btn-gradient" id="withdraw-submit-btn">Подати заявку</button>
+        </form>
+
+        <div id="withdraw-success" class="card withdraw-success" hidden>
+          <div class="success-icon">✅</div>
+          <div class="lock-title">Заявку надіслано</div>
+          <p class="lock-hint">Адміністратор обробить її найближчим часом. Кошти зʼявляться після підтвердження.</p>
+        </div>
+      </section>
+
+      <section id="tab-admin" class="tab-panel" hidden>
+        <h2 class="section-title">Адмін-панель</h2>
+        <div class="admin-stats-grid" id="admin-stats-grid"></div>
+
+        <h3 class="section-subtitle">🏆 Топ реферери</h3>
+        <div id="admin-top-list" class="list"></div>
+
+        <h3 class="section-subtitle">💸 Заявки на виведення</h3>
+        <div id="admin-requests-list" class="list"></div>
+
+        <h3 class="section-subtitle">📢 Розсилка</h3>
+        <div class="card">
+          <textarea id="broadcast-text" placeholder="Текст повідомлення для всіх користувачів..." rows="3"></textarea>
+          <button class="btn btn-gradient" id="broadcast-btn">Надіслати всім</button>
+        </div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav">
+      <button class="nav-btn" data-tab="home" aria-pressed="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+        <span>Головна</span>
+      </button>
+      <button class="nav-btn" data-tab="referrals" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6.5 6.5-6.5s6.5 2.9 6.5 6.5"/><circle cx="17" cy="8" r="3"/><path d="M16 13.6c2.9.6 5 3.2 5 6.4"/></svg>
+        <span>Реферали</span>
+      </button>
+      <button class="nav-btn" data-tab="withdraw" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="13" rx="2.5"/><path d="M2.5 10h19"/><circle cx="16.5" cy="14.5" r="1.4" fill="currentColor" stroke="none"/></svg>
+        <span>Вивід</span>
+      </button>
+      <button class="nav-btn" id="nav-admin-btn" data-tab="admin" aria-pressed="false" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5l7.5 3.2v5.3c0 5-3.2 8.6-7.5 10.5-4.3-1.9-7.5-5.5-7.5-10.5V5.7L12 2.5z"/></svg>
+        <span>Адмін</span>
+      </button>
+    </nav>
+  </div>
+
+  <div id="modal-overlay" class="modal-overlay" hidden>
+    <div class="modal">
+      <p id="modal-message" class="modal-message"></p>
+      <div class="modal-actions">
+        <button id="modal-cancel" class="btn btn-outline">Скасувати</button>
+        <button id="modal-confirm" class="btn btn-solid">Підтвердити</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="howto-overlay" class="modal-overlay" hidden>
+    <div class="modal howto-modal">
+      <h3>ℹ️ Як це працює</h3>
+      <ol class="howto-list">
+        <li>Отримай своє реферальне посилання на вкладці «Головна»</li>
+        <li>Надішли його друзям</li>
+        <li>Коли друг перейде за посиланням і підпишеться на канал — тобі нарахують бонус</li>
+        <li>Накопич мінімальну суму і виведи всі кошти одним запитом</li>
+      </ol>
+      <button id="howto-close" class="btn btn-solid">Зрозуміло</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
