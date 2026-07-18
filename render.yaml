@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: tg-referral-bot
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: ADMIN_IDS
+        sync: false
+      - key: CHANNEL_USERNAME
+        sync: false
+      - key: CHANNEL_ID
+        sync: false
+      - key: CHANNEL_INVITE_LINK
+        sync: false
+      - key: REFERRAL_BONUS
+        value: "7"
+      - key: MIN_WITHDRAWAL
+        value: "70"
+      - key: SUPPORT_CONTACT
+        sync: false
+      - key: MINI_APP_URL
+        sync: false
