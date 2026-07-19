@@ -47,8 +47,17 @@ input, textarea { background: var(--bg-elevated-2); border: 1px solid rgba(255,2
 .view-loading {
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 1rem;
+  padding: 0 2rem;
+  text-align: center;
+}
+.loading-hint {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  max-width: 260px;
 }
 .spinner {
   width: 34px; height: 34px;

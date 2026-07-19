@@ -35,7 +35,7 @@
   async function api(path, options) {
     options = options || {};
     var controller = new AbortController();
-    var timeout = setTimeout(function () { controller.abort(); }, 20000);
+    var timeout = setTimeout(function () { controller.abort(); }, 55000);
     var res;
     try {
       res = await fetch(path, Object.assign({}, options, {
@@ -114,6 +114,11 @@
     viewLoading.hidden = false;
     viewGate.hidden = true;
     appShell.hidden = true;
+    var hint = document.getElementById('loading-hint');
+    hint.hidden = true;
+    setTimeout(function () {
+      if (!viewLoading.hidden) hint.hidden = false;
+    }, 3000);
   }
 
   function showGate() {
