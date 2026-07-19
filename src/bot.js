@@ -27,7 +27,10 @@ function isAdmin(ctx) {
 
 function openAppKeyboard() {
   if (!config.miniAppUrl) return undefined;
-  return Markup.keyboard([[Markup.button.webApp('🚀 Відкрити кабінет', miniAppUrlVersioned)]]).resize();
+  // Inline web_app buttons launch reliably across Telegram clients; the reply
+  // (bottom) keyboard variant of the same button type is flakier on some
+  // clients, where it needs the chat menu button instead to actually open.
+  return Markup.inlineKeyboard([[Markup.button.webApp('🚀 Відкрити кабінет', miniAppUrlVersioned)]]);
 }
 
 // ---------- ensure every user exists in db ----------
