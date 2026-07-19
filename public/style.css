@@ -20,6 +20,11 @@
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
+/* Author-level display rules (e.g. `.view-gate { display: flex }`) otherwise
+   beat the browser's default [hidden] styling at equal specificity, leaving
+   "hidden" views stacked and visible. This makes [hidden] win unconditionally. */
+[hidden] { display: none !important; }
+
 html, body {
   margin: 0;
   background: var(--bg-base);
