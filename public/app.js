@@ -34,12 +34,23 @@
   // ---------- API ----------
   async function api(path, options) {
     options = options || {};
-    var res = await fetch(path, Object.assign({}, options, {
-      headers: Object.assign(
-        { 'Content-Type': 'application/json', Authorization: 'tma ' + initData },
-        options.headers || {}
-      ),
-    }));
+    var controller = new AbortController();
+    var timeout = setTimeout(function () { controller.abort(); }, 20000);
+    var res;
+    try {
+      res = await fetch(path, Object.assign({}, options, {
+        signal: controller.signal,
+        headers: Object.assign(
+          { 'Content-Type': 'application/json', Authorization: 'tma ' + initData },
+          options.headers || {}
+        ),
+      }));
+    } catch (err) {
+      if (err.name === 'AbortError') throw new Error('Сервер не відповідає, спробуй ще раз');
+      throw err;
+    } finally {
+      clearTimeout(timeout);
+    }
     if (!res.ok) {
       var body = {};
       try { body = await res.json(); } catch (err) { /* ignore */ }
