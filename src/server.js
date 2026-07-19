@@ -10,7 +10,14 @@ const { telegramAuthMiddleware } = require('./telegramAuth');
 
 const app = express();
 app.use(express.json());
-app.use(express.static(path.join(__dirname, '..', 'public')));
+// Telegram's in-app WebView caches aggressively by URL; without this, a redeploy
+// of the Mini App's HTML/JS can silently keep serving a stale cached copy on
+// devices that already opened it once.
+app.use(express.static(path.join(__dirname, '..', 'public'), {
+  setHeaders(res) {
+    res.setHeader('Cache-Control', 'no-cache, must-revalidate');
+  },
+}));
 
 function isAdminId(id) {
   return config.adminIds.includes(String(id));
