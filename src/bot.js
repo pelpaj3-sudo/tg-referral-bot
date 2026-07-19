@@ -16,6 +16,13 @@ if (!config.miniAppUrl) {
   console.warn('Увага: MINI_APP_URL не задано — кнопка відкриття Mini App у боті буде прихована.');
 }
 
+// Telegram's client caches Mini App pages by URL, sometimes ignoring HTTP
+// cache headers entirely. Appending a version tied to process start time
+// makes every deploy look like a brand-new URL, forcing a fresh load.
+const miniAppUrlVersioned = config.miniAppUrl
+  ? `${config.miniAppUrl}${config.miniAppUrl.includes('?') ? '&' : '?'}v=${Date.now()}`
+  : '';
+
 // userId -> { type: 'withdraw' | 'broadcast' }
 const pendingAction = new Map();
 
@@ -30,7 +37,7 @@ function sleep(ms) {
 function mainMenuKeyboard(userId, cfg) {
   const base = kb.mainMenu(userId, cfg);
   if (!cfg.miniAppUrl) return base;
-  const rows = [[Markup.button.webApp('🚀 Особистий кабінет', cfg.miniAppUrl)], ...base.reply_markup.keyboard];
+  const rows = [[Markup.button.webApp('🚀 Особистий кабінет', miniAppUrlVersioned)], ...base.reply_markup.keyboard];
   return Markup.keyboard(rows).resize();
 }
 
@@ -265,7 +272,7 @@ async function setupMenuButton() {
   if (!config.miniAppUrl) return;
   try {
     await bot.telegram.setChatMenuButton({
-      menuButton: { type: 'web_app', text: 'Кабінет', web_app: { url: config.miniAppUrl } },
+      menuButton: { type: 'web_app', text: 'Кабінет', web_app: { url: miniAppUrlVersioned } },
     });
   } catch (err) {
     console.error('Не вдалося встановити кнопку меню Mini App:', err.message);
